@@ -1,0 +1,20 @@
+{
+  "name": "ShasthoBondhu AI",
+  "short_name": "ShasthoBondhu",
+  "description": "AI-powered healthcare access platform for rural & hill tract communities",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["health", "medical", "lifestyle"],
+  "lang": "en",
+  "dir": "ltr"
+}
