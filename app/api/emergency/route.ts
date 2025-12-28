@@ -102,7 +102,7 @@ export const GET = async (request: NextRequest) => {
     const apiError = handleApiError(error)
     return NextResponse.json(apiError, { status: 500 })
   }
-})
+};
 
 // PATCH /api/emergency/[id]/resolve - Resolve emergency alert
 interface RouteParams {
@@ -167,7 +167,7 @@ export const PATCH = async (request: NextRequest, { params }: RouteParams) => {
     const apiError = handleApiError(error)
     return NextResponse.json(apiError, { status: 500 })
   }
-})
+};
 
 // POST /api/emergency - Create emergency alert (Admin/Healthcare Worker only)
 export const POST = async (request: NextRequest) => {
@@ -260,4 +260,4 @@ export const POST = async (request: NextRequest) => {
     const apiError = handleApiError(error)
     return NextResponse.json(apiError, { status: 500 })
   }
-})
+};

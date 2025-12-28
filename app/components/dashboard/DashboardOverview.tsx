@@ -19,32 +19,15 @@ export default function DashboardOverview({ language, user, onNavigate }: Dashbo
     healthScore: 85,
     recommendations: [] as string[],
   });
-  const [recentActivity, setRecentActivity] = useState([
-    {
-      id: '1',
-      type: 'consultation',
-      title: 'Symptom Check Completed',
-      description: 'Headache analysis - Low priority',
-      timestamp: '2 hours ago',
-      icon: '🩺',
-    },
-    {
-      id: '2',
-      type: 'education',
-      title: 'Health Education Read',
-      description: 'Prevention of common diseases',
-      timestamp: '1 day ago',
-      icon: '📚',
-    },
-    {
-      id: '3',
-      type: 'resource',
-      title: 'Medical Resource Found',
-      description: 'Nearest hospital identified',
-      timestamp: '2 days ago',
-      icon: '🏥',
-    },
-  ]);
+  const [recentActivity, setRecentActivity] = useState<Array<{
+    id: string;
+    type: string;
+    title: string;
+    description: string;
+    timestamp: string;
+    icon: string;
+  }>>([]);
+  const [loading, setLoading] = useState(true);
 
   const texts = {
     EN: {
@@ -92,14 +75,42 @@ export default function DashboardOverview({ language, user, onNavigate }: Dashbo
   const t = texts[language];
 
   useEffect(() => {
-    // Simulate loading dashboard stats
     const loadDashboardStats = async () => {
       try {
-        // In a real app, this would be an API call
+        setLoading(true);
+        
+        // Fetch dashboard statistics
+        const statsResponse = await UsersService.getDashboardStats();
+        if (statsResponse.success) {
+          setStats({
+            totalConsultations: statsResponse.data.recentConsultations || 0,
+            emergencyAlerts: statsResponse.data.emergencyAlerts || 0,
+            unreadNotifications: statsResponse.data.unreadNotifications || 0,
+            healthScore: statsResponse.data.healthScore || 85,
+            recommendations: statsResponse.data.recommendations || [],
+          });
+        }
+        
+        // Fetch recent consultations for activity
+        const consultationsResponse = await ConsultationService.getConsultations(1, 5);
+        if (consultationsResponse.success) {
+          const activities = consultationsResponse.data.consultations.map((consultation, index) => ({
+            id: consultation.id,
+            type: 'consultation',
+            title: language === 'EN' ? 'Symptom Check Completed' : 'লক্ষণ পরীক্ষা সম্পন্ন',
+            description: `${consultation.symptoms.slice(0, 50)}... - ${ConsultationService.getUrgencyText(consultation.urgencyLevel, language)}`,
+            timestamp: new Date(consultation.createdAt).toLocaleString(),
+            icon: '🩺',
+          }));
+          setRecentActivity(activities);
+        }
+      } catch (error) {
+        console.error('Error loading dashboard stats:', error);
+        // Set fallback data in case of error
         setStats({
-          totalConsultations: 12,
+          totalConsultations: 0,
           emergencyAlerts: 0,
-          unreadNotifications: 3,
+          unreadNotifications: 0,
           healthScore: 85,
           recommendations: [
             language === 'EN' 
@@ -110,8 +121,8 @@ export default function DashboardOverview({ language, user, onNavigate }: Dashbo
               : 'খাবারের পর ১০ মিনিট হাঁটুন',
           ],
         });
-      } catch (error) {
-        console.error('Error loading dashboard stats:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -205,55 +216,71 @@ export default function DashboardOverview({ language, user, onNavigate }: Dashbo
       {/* Stats Grid */}
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-4">{t.stats}</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">{t.totalConsultations}</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalConsultations}</p>
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 animate-pulse">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                    <div className="h-8 bg-gray-200 rounded w-16"></div>
+                  </div>
+                  <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+                </div>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span className="text-blue-600 text-xl">🩺</span>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">{t.totalConsultations}</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalConsultations}</p>
+                </div>
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <span className="text-blue-600 text-xl">🩺</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">{t.emergencyAlerts}</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.emergencyAlerts}</p>
-              </div>
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                <span className="text-red-600 text-xl">🚨</span>
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">{t.emergencyAlerts}</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.emergencyAlerts}</p>
+                </div>
+                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                  <span className="text-red-600 text-xl">🚨</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">{t.unreadNotifications}</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.unreadNotifications}</p>
-              </div>
-              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <span className="text-yellow-600 text-xl">🔔</span>
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">{t.unreadNotifications}</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.unreadNotifications}</p>
+                </div>
+                <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                  <span className="text-yellow-600 text-xl">🔔</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">{t.healthScore}</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.healthScore}%</p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <span className="text-green-600 text-xl">💚</span>
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">{t.healthScore}</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.healthScore}%</p>
+                </div>
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <span className="text-green-600 text-xl">💚</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Recent Activity and Recommendations */}
@@ -269,20 +296,39 @@ export default function DashboardOverview({ language, user, onNavigate }: Dashbo
               {t.viewAll}
             </button>
           </div>
-          <div className="space-y-4">
-            {recentActivity.map((activity) => (
-              <div key={activity.id} className="flex items-start space-x-3">
-                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-sm">{activity.icon}</span>
+          {loading ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-start space-x-3 animate-pulse">
+                  <div className="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-200 rounded w-full"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                  <p className="text-sm text-gray-600">{activity.description}</p>
-                  <p className="text-xs text-gray-500 mt-1">{activity.timestamp}</p>
+              ))}
+            </div>
+          ) : recentActivity.length > 0 ? (
+            <div className="space-y-4">
+              {recentActivity.map((activity) => (
+                <div key={activity.id} className="flex items-start space-x-3">
+                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-sm">{activity.icon}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900">{activity.title}</p>
+                    <p className="text-sm text-gray-600">{activity.description}</p>
+                    <p className="text-xs text-gray-500 mt-1">{activity.timestamp}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500">{language === 'EN' ? 'No recent activity' : 'কোন সাম্প্রতিক কার্যকলাপ নেই'}</p>
+            </div>
+          )}
         </div>
 
         {/* Recommendations */}

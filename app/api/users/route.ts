@@ -61,7 +61,7 @@ export const GET = async (request: NextRequest) => {
     const apiError = handleApiError(error)
     return NextResponse.json(apiError, { status: 500 })
   }
-})
+};
 
 // PATCH /api/users/profile - Update current user profile
 export const PATCH = async (request: NextRequest) => {
@@ -128,5 +128,4 @@ export const PATCH = async (request: NextRequest) => {
     const apiError = handleApiError(error)
     return NextResponse.json(apiError, { status: 500 })
   }
-})
-
+};

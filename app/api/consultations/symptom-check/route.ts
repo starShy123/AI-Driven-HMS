@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
-import { requireAuth } from '@/lib/auth'
-import { analyzeSymptoms, detectEmergency } from '@/lib/ai'
-import { createConsultationSchema } from '@/lib/validations'
-import { asyncHandler, handleApiError, ValidationError, handleDatabaseError, handleAIError } from '@/utils/errors'
-import { containsEmergencyKeywords, formatApiResponse } from '@/utils/helpers'
-import { UrgencyLevel, Language } from '@prisma/client'
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+import { requireAuth } from '@/lib/auth';
+import { analyzeSymptoms, detectEmergency } from '@/lib/ai';
+import { createConsultationSchema } from '@/lib/validations';
+import { asyncHandler, handleApiError, ValidationError, handleDatabaseError, handleAIError } from '@/utils/errors';
+import { containsEmergencyKeywords, formatApiResponse } from '@/utils/helpers';
+import { UrgencyLevel, Language } from '@prisma/client';
 
 export const POST = async (request: NextRequest) => {
   try {
     // Authenticate user and get full user data
-    const authUser = await requireAuth(request)
+    const authUser = await requireAuth(request);
     const user = await prisma.user.findUnique({
       where: { id: authUser.id },
       select: {
@@ -26,31 +26,31 @@ export const POST = async (request: NextRequest) => {
         latitude: true,
         longitude: true,
       },
-    })
+    });
     
     if (!user) {
       return NextResponse.json(
         { success: false, message: 'User not found' },
         { status: 404 }
-      )
+      );
     }
     
-    const body = await request.json()
+    const body = await request.json();
     
     // Validate input
-    const validatedData = createConsultationSchema.parse(body)
+    const validatedData = createConsultationSchema.parse(body);
     
     // Check for emergency keywords in symptoms
     const hasEmergencyKeywords = containsEmergencyKeywords(
       validatedData.symptoms, 
       validatedData.language as Language
-    )
+    );
     
     // Start AI analysis and emergency detection in parallel
     const [analysisResult, emergencyCheck] = await Promise.allSettled([
       analyzeSymptoms(validatedData.symptoms, validatedData.language as Language),
       detectEmergency(validatedData.symptoms, validatedData.language as Language)
-    ])
+    ]);
     
     let analysis: any = {
       possibleConditions: ['Analysis pending'],
@@ -58,33 +58,33 @@ export const POST = async (request: NextRequest) => {
       recommendations: ['Consult healthcare provider'],
       riskScore: 5,
       emergencyFlags: [],
-    }
+    };
     
     let emergency = {
       isEmergency: false,
       message: 'No emergency detected',
-    }
+    };
     
     // Handle AI analysis results
     if (analysisResult.status === 'fulfilled') {
-      analysis = analysisResult.value
+      analysis = analysisResult.value;
     } else {
-      console.error('AI Analysis Error:', analysisResult.reason)
-      handleAIError(analysisResult.reason, 'symptom analysis')
+      console.error('AI Analysis Error:', analysisResult.reason);
+      handleAIError(analysisResult.reason, 'symptom analysis');
     }
     
     // Handle emergency detection results
     if (emergencyCheck.status === 'fulfilled') {
-      emergency = emergencyCheck.value
+      emergency = emergencyCheck.value;
     } else {
-      console.error('Emergency Detection Error:', emergencyCheck.reason)
-      handleAIError(emergencyCheck.reason, 'emergency detection')
+      console.error('Emergency Detection Error:', emergencyCheck.reason);
+      handleAIError(emergencyCheck.reason, 'emergency detection');
     }
     
     // Determine final urgency level
-    let finalUrgencyLevel = analysis.urgencyLevel
+    let finalUrgencyLevel = analysis.urgencyLevel;
     if (emergency.isEmergency || hasEmergencyKeywords) {
-      finalUrgencyLevel = 'EMERGENCY'
+      finalUrgencyLevel = 'EMERGENCY';
     }
     
     // Create consultation record
@@ -116,10 +116,10 @@ export const POST = async (request: NextRequest) => {
           },
         },
       },
-    })
+    });
     
     // Create emergency alert if needed
-    let emergencyAlert = null
+    let emergencyAlert = null;
     if (emergency.isEmergency || finalUrgencyLevel === 'EMERGENCY') {
       emergencyAlert = await prisma.emergencyAlert.create({
         data: {
@@ -133,7 +133,7 @@ export const POST = async (request: NextRequest) => {
           latitude: user.latitude || null,
           longitude: user.longitude || null,
         },
-      })
+      });
     }
     
     // Prepare response based on language
@@ -163,49 +163,49 @@ export const POST = async (request: NextRequest) => {
           division: user.division || null,
         },
       },
-    }
+    };
     
     return NextResponse.json(
       formatApiResponse(response, 'Symptom analysis completed'),
       { status: 201 }
-    )
+    );
     
   } catch (error) {
     if (error instanceof ValidationError) {
       return NextResponse.json(
         { success: false, message: error.message, error: { code: error.code, details: error.details } },
         { status: 400 }
-      )
+      );
     }
     
     try {
-      handleDatabaseError(error)
+      handleDatabaseError(error);
     } catch (dbError) {
-      const apiError = handleApiError(dbError)
-      return NextResponse.json(apiError, { status: 500 })
+      const apiError = handleApiError(dbError);
+      return NextResponse.json(apiError, { status: 500 });
     }
     
-    const apiError = handleApiError(error)
-    return NextResponse.json(apiError, { status: 500 })
+    const apiError = handleApiError(error);
+    return NextResponse.json(apiError, { status: 500 });
   }
-})
+};
 
 export const GET = async (request: NextRequest) => {
   try {
     // Authenticate user
-    const user = await requireAuth(request)
+    const user = await requireAuth(request);
     
-    const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
-    const status = searchParams.get('status')
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const status = searchParams.get('status');
     
-    const skip = (page - 1) * limit
+    const skip = (page - 1) * limit;
     
     // Build where clause
-    const where: any = { userId: user.id }
+    const where: any = { userId: user.id };
     if (status) {
-      where.status = status
+      where.status = status;
     }
     
     // Get consultations with pagination
@@ -222,9 +222,9 @@ export const GET = async (request: NextRequest) => {
         },
       }),
       prisma.consultation.count({ where }),
-    ])
+    ]);
     
-    const totalPages = Math.ceil(total / limit)
+    const totalPages = Math.ceil(total / limit);
     
     return NextResponse.json({
       success: true,
@@ -240,10 +240,11 @@ export const GET = async (request: NextRequest) => {
           hasPrev: page > 1,
         },
       },
-    })
+    });
     
   } catch (error) {
-    const apiError = handleApiError(error)
-    return NextResponse.json(apiError, { status: 500 })
+    const apiError = handleApiError(error);
+    return NextResponse.json(apiError, { status: 500 });
   }
-})
+};
+

@@ -108,7 +108,7 @@ export const GET = async (request: NextRequest) => {
     const apiError = handleApiError(error)
     return NextResponse.json(apiError, { status: 500 })
   }
-})
+};
 
 // POST /api/disease-trends - Create disease tracking record (Admin/Healthcare Worker only)
 export const POST = async (request: NextRequest) => {
@@ -176,4 +176,4 @@ export const POST = async (request: NextRequest) => {
     const apiError = handleApiError(error)
     return NextResponse.json(apiError, { status: 500 })
   }
-})
+};

@@ -69,7 +69,7 @@ export const createUserSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
   phone: z.string().optional(),
-  dateOfBirth: z.string().datetime().optional(),
+  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format').optional(),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
   village: z.string().optional(),
   upazila: z.string().optional(),
@@ -91,7 +91,7 @@ export const updateUserSchema = z.object({
   firstName: z.string().min(1).optional(),
   lastName: z.string().min(1).optional(),
   phone: z.string().optional(),
-  dateOfBirth: z.string().datetime().optional(),
+  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format').optional(),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
   village: z.string().optional(),
   upazila: z.string().optional(),
@@ -188,7 +188,7 @@ export const createHealthRecordSchema = z.object({
   value: z.string().min(1, 'Value is required'),
   unit: z.string().optional(),
   notes: z.string().optional(),
-  recordedAt: z.string().datetime().optional(),
+  recordedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format').optional(),
 })
 
 // Query parameter schemas
@@ -214,7 +214,7 @@ export const createDiseaseTrackingSchema = z.object({
   resolvedCases: z.number().min(0).default(0),
   trendDirection: z.enum(['increasing', 'decreasing', 'stable']).optional(),
   riskLevel: z.enum(['low', 'medium', 'high']).optional(),
-  reportedDate: z.string().datetime(),
+  reportedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format'),
   dataSource: z.string().optional(),
 })
 

@@ -1,201 +1,227 @@
 "use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/app/providers';
-import AuthService, { RegisterRequest } from '@/app/services/auth';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/providers";
+import AuthService, { RegisterRequest } from "@/app/services/auth";
 
 interface RegisterFormProps {
   onToggleMode: () => void;
-  language: 'EN' | 'BN';
+  language: "EN" | "BN";
 }
 
-export default function RegisterForm({ onToggleMode, language }: RegisterFormProps) {
+export default function RegisterForm({
+  onToggleMode,
+  language,
+}: RegisterFormProps) {
   const router = useRouter();
   const { dispatch } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<RegisterRequest & { confirmPassword?: string }>({
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-    phone: '',
-    dateOfBirth: '',
-    gender: 'MALE',
-    village: '',
-    upazila: '',
-    district: '',
-    division: '',
+  const [formData, setFormData] = useState<
+    RegisterRequest & { confirmPassword?: string }
+  >({
+    email: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
+    dateOfBirth: "",
+    gender: "MALE",
+    village: "",
+    upazila: "",
+    district: "",
+    division: "",
     latitude: 0,
     longitude: 0,
-    medicalHistory: '',
-    allergies: '',
-    currentMedications: '',
-    confirmPassword: '',
+    medicalHistory: "",
+    allergies: "",
+    currentMedications: "",
+    confirmPassword: "",
   });
-  const [errors, setErrors] = useState<Partial<RegisterRequest & { confirmPassword?: string }>>({});
+  const [errors, setErrors] = useState<
+    Partial<RegisterRequest & { confirmPassword?: string }>
+  >({});
   const [showPassword, setShowPassword] = useState(false);
 
   const texts = {
     EN: {
-      title: 'Create Account',
-      subtitle: 'Join ShasthoBondhu AI for better healthcare access',
+      title: "Create Account",
+      subtitle: "Join ShasthoBondhu AI for better healthcare access",
       // Step 1 - Personal Info
-      personalInfo: 'Personal Information',
-      firstName: 'First Name',
-      firstNamePlaceholder: 'Enter your first name',
-      lastName: 'Last Name',
-      lastNamePlaceholder: 'Enter your last name',
-      email: 'Email Address',
-      emailPlaceholder: 'Enter your email',
-      phone: 'Phone Number',
-      phonePlaceholder: 'Enter your phone number',
-      dateOfBirth: 'Date of Birth',
-      gender: 'Gender',
-      genderMale: 'Male',
-      genderFemale: 'Female',
-      genderOther: 'Other',
+      personalInfo: "Personal Information",
+      firstName: "First Name",
+      firstNamePlaceholder: "Enter your first name",
+      lastName: "Last Name",
+      lastNamePlaceholder: "Enter your last name",
+      email: "Email Address",
+      emailPlaceholder: "Enter your email",
+      phone: "Phone Number",
+      phonePlaceholder: "Enter your phone number",
+      dateOfBirth: "Date of Birth",
+      gender: "Gender",
+      genderMale: "Male",
+      genderFemale: "Female",
+      genderOther: "Other",
       // Step 2 - Location
-      locationInfo: 'Location Information',
-      village: 'Village/Area',
-      villagePlaceholder: 'Enter your village or area',
-      upazila: 'Upazila',
-      upazilaPlaceholder: 'Enter your upazila',
-      district: 'District',
-      districtPlaceholder: 'Enter your district',
-      division: 'Division',
-      divisionPlaceholder: 'Enter your division',
+      locationInfo: "Location Information",
+      village: "Village/Area",
+      villagePlaceholder: "Enter your village or area",
+      upazila: "Upazila",
+      upazilaPlaceholder: "Enter your upazila",
+      district: "District",
+      districtPlaceholder: "Enter your district",
+      division: "Division",
+      divisionPlaceholder: "Enter your division",
       // Step 3 - Medical Info
-      medicalInfo: 'Medical Information',
-      medicalHistory: 'Medical History',
-      medicalHistoryPlaceholder: 'Enter your medical history (optional)',
-      allergies: 'Allergies',
-      allergiesPlaceholder: 'Enter your allergies (optional)',
-      currentMedications: 'Current Medications',
-      currentMedicationsPlaceholder: 'Enter current medications (optional)',
+      medicalInfo: "Medical Information",
+      medicalHistory: "Medical History",
+      medicalHistoryPlaceholder: "Enter your medical history (optional)",
+      allergies: "Allergies",
+      allergiesPlaceholder: "Enter your allergies (optional)",
+      currentMedications: "Current Medications",
+      currentMedicationsPlaceholder: "Enter current medications (optional)",
       // Step 4 - Security
-      securityInfo: 'Security',
-      password: 'Password',
-      passwordPlaceholder: 'Create a strong password',
-      confirmPassword: 'Confirm Password',
-      confirmPasswordPlaceholder: 'Confirm your password',
+      securityInfo: "Security",
+      password: "Password",
+      passwordPlaceholder: "Create a strong password",
+      confirmPassword: "Confirm Password",
+      confirmPasswordPlaceholder: "Confirm your password",
       // Form Actions
-      next: 'Next',
-      back: 'Back',
-      register: 'Create Account',
-      registerLoading: 'Creating Account...',
+      next: "Next",
+      back: "Back",
+      register: "Create Account",
+      registerLoading: "Creating Account...",
       // Navigation
-      alreadyHaveAccount: 'Already have an account?',
-      signIn: 'Sign In',
+      alreadyHaveAccount: "Already have an account?",
+      signIn: "Sign In",
       // Validation Messages
-      firstNameRequired: 'First name is required',
-      lastNameRequired: 'Last name is required',
-      emailRequired: 'Email is required',
-      emailInvalid: 'Please enter a valid email address',
-      phoneRequired: 'Phone number is required',
-      phoneInvalid: 'Please enter a valid phone number',
-      dateOfBirthRequired: 'Date of birth is required',
-      genderRequired: 'Gender is required',
-      villageRequired: 'Village/Area is required',
-      upazilaRequired: 'Upazila is required',
-      districtRequired: 'District is required',
-      divisionRequired: 'Division is required',
-      passwordRequired: 'Password is required',
-      passwordMinLength: 'Password must be at least 8 characters',
-      passwordWeak: 'Password should contain uppercase, lowercase, and numbers',
-      confirmPasswordRequired: 'Confirm password is required',
-      passwordMismatch: 'Passwords do not match',
-      registerSuccess: 'Account created successfully! Redirecting to login...',
-      registerError: 'Registration failed. Please try again.',
+      firstNameRequired: "First name is required",
+      lastNameRequired: "Last name is required",
+      emailRequired: "Email is required",
+      emailInvalid: "Please enter a valid email address",
+      phoneRequired: "Phone number is required",
+      phoneInvalid: "Please enter a valid phone number",
+      dateOfBirthRequired: "Date of birth is required",
+      genderRequired: "Gender is required",
+      villageRequired: "Village/Area is required",
+      upazilaRequired: "Upazila is required",
+      districtRequired: "District is required",
+      divisionRequired: "Division is required",
+      passwordRequired: "Password is required",
+      passwordMinLength: "Password must be at least 8 characters",
+      passwordWeak: "Password should contain uppercase, lowercase, and numbers",
+      confirmPasswordRequired: "Confirm password is required",
+      passwordMismatch: "Passwords do not match",
+      registerSuccess: "Account created successfully! Redirecting to login...",
+      registerError: "Registration failed. Please try again.",
       // Step Titles
-      step1Title: 'Personal Details',
-      step2Title: 'Location',
-      step3Title: 'Medical Info',
-      step4Title: 'Security',
+      step1Title: "Personal Details",
+      step2Title: "Location",
+      step3Title: "Medical Info",
+      step4Title: "Security",
     },
     BN: {
-      title: 'অ্যাকাউন্ট তৈরি করুন',
-      subtitle: 'উন্নত স্বাস্থ্যসেবার জন্য ShasthoBondhu AI এ যোগ দিন',
+      title: "অ্যাকাউন্ট তৈরি করুন",
+      subtitle: "উন্নত স্বাস্থ্যসেবার জন্য ShasthoBondhu AI এ যোগ দিন",
       // Step 1 - Personal Info
-      personalInfo: 'ব্যক্তিগত তথ্য',
-      firstName: 'নামের প্রথম অংশ',
-      firstNamePlaceholder: 'আপনার নামের প্রথম অংশ দিন',
-      lastName: 'নামের শেষ অংশ',
-      lastNamePlaceholder: 'আপনার নামের শেষ অংশ দিন',
-      email: 'ইমেইল ঠিকানা',
-      emailPlaceholder: 'আপনার ইমেইল দিন',
-      phone: 'ফোন নম্বর',
-      phonePlaceholder: 'আপনার ফোন নম্বর দিন',
-      dateOfBirth: 'জন্ম তারিখ',
-      gender: 'লিঙ্গ',
-      genderMale: 'পুরুষ',
-      genderFemale: 'নারী',
-      genderOther: 'অন্যান্য',
+      personalInfo: "ব্যক্তিগত তথ্য",
+      firstName: "নামের প্রথম অংশ",
+      firstNamePlaceholder: "আপনার নামের প্রথম অংশ দিন",
+      lastName: "নামের শেষ অংশ",
+      lastNamePlaceholder: "আপনার নামের শেষ অংশ দিন",
+      email: "ইমেইল ঠিকানা",
+      emailPlaceholder: "আপনার ইমেইল দিন",
+      phone: "ফোন নম্বর",
+      phonePlaceholder: "আপনার ফোন নম্বর দিন",
+      dateOfBirth: "জন্ম তারিখ",
+      gender: "লিঙ্গ",
+      genderMale: "পুরুষ",
+      genderFemale: "নারী",
+      genderOther: "অন্যান্য",
       // Step 2 - Location
-      locationInfo: 'অবস্থানের তথ্য',
-      village: 'গ্রাম/এলাকা',
-      villagePlaceholder: 'আপনার গ্রাম বা এলাকা দিন',
-      upazila: 'উপজেলা',
-      upazilaPlaceholder: 'আপনার উপজেলা দিন',
-      district: 'জেলা',
-      districtPlaceholder: 'আপনার জেলা দিন',
-      division: 'বিভাগ',
-      divisionPlaceholder: 'আপনার বিভাগ দিন',
+      locationInfo: "অবস্থানের তথ্য",
+      village: "গ্রাম/এলাকা",
+      villagePlaceholder: "আপনার গ্রাম বা এলাকা দিন",
+      upazila: "উপজেলা",
+      upazilaPlaceholder: "আপনার উপজেলা দিন",
+      district: "জেলা",
+      districtPlaceholder: "আপনার জেলা দিন",
+      division: "বিভাগ",
+      divisionPlaceholder: "আপনার বিভাগ দিন",
       // Step 3 - Medical Info
-      medicalInfo: 'চিকিৎসা তথ্য',
-      medicalHistory: 'চিকিৎসা ইতিহাস',
-      medicalHistoryPlaceholder: 'আপনার চিকিৎসা ইতিহাস দিন (ঐচ্ছিক)',
-      allergies: 'অ্যালার্জি',
-      allergiesPlaceholder: 'আপনার অ্যালার্জি দিন (ঐচ্ছিক)',
-      currentMedications: 'বর্তমান ওষুধ',
-      currentMedicationsPlaceholder: 'বর্তমান ওষুধের তালিকা দিন (ঐচ্ছিক)',
+      medicalInfo: "চিকিৎসা তথ্য",
+      medicalHistory: "চিকিৎসা ইতিহাস",
+      medicalHistoryPlaceholder: "আপনার চিকিৎসা ইতিহাস দিন (ঐচ্ছিক)",
+      allergies: "অ্যালার্জি",
+      allergiesPlaceholder: "আপনার অ্যালার্জি দিন (ঐচ্ছিক)",
+      currentMedications: "বর্তমান ওষুধ",
+      currentMedicationsPlaceholder: "বর্তমান ওষুধের তালিকা দিন (ঐচ্ছিক)",
       // Step 4 - Security
-      securityInfo: 'নিরাপত্তা',
-      password: 'পাসওয়ার্ড',
-      passwordPlaceholder: 'একটি শক্তিশালী পাসওয়ার্ড তৈরি করুন',
-      confirmPassword: 'পাসওয়ার্ড নিশ্চিত করুন',
-      confirmPasswordPlaceholder: 'আপনার পাসওয়ার্ড নিশ্চিত করুন',
+      securityInfo: "নিরাপত্তা",
+      password: "পাসওয়ার্ড",
+      passwordPlaceholder: "একটি শক্তিশালী পাসওয়ার্ড তৈরি করুন",
+      confirmPassword: "পাসওয়ার্ড নিশ্চিত করুন",
+      confirmPasswordPlaceholder: "আপনার পাসওয়ার্ড নিশ্চিত করুন",
       // Form Actions
-      next: 'পরবর্তী',
-      back: 'পূর্ববর্তী',
-      register: 'অ্যাকাউন্ট তৈরি করুন',
-      registerLoading: 'অ্যাকাউন্ট তৈরি হচ্ছে...',
+      next: "পরবর্তী",
+      back: "পূর্ববর্তী",
+      register: "অ্যাকাউন্ট তৈরি করুন",
+      registerLoading: "অ্যাকাউন্ট তৈরি হচ্ছে...",
       // Navigation
-      alreadyHaveAccount: 'ইতিমধ্যে একটি অ্যাকাউন্ট আছে?',
-      signIn: 'সাইন ইন',
+      alreadyHaveAccount: "ইতিমধ্যে একটি অ্যাকাউন্ট আছে?",
+      signIn: "সাইন ইন",
       // Validation Messages
-      firstNameRequired: 'নামের প্রথম অংশ আবশ্যক',
-      lastNameRequired: 'নামের শেষ অংশ আবশ্যক',
-      emailRequired: 'ইমেইল আবশ্যক',
-      emailInvalid: 'অনুগ্রহ করে একটি বৈধ ইমেইল ঠিকানা দিন',
-      phoneRequired: 'ফোন নম্বর আবশ্যক',
-      phoneInvalid: 'অনুগ্রহ করে একটি বৈধ ফোন নম্বর দিন',
-      dateOfBirthRequired: 'জন্ম তারিখ আবশ্যক',
-      genderRequired: 'লিঙ্গ আবশ্যক',
-      villageRequired: 'গ্রাম/এলাকা আবশ্যক',
-      upazilaRequired: 'উপজেলা আবশ্যক',
-      districtRequired: 'জেলা আবশ্যক',
-      divisionRequired: 'বিভাগ আবশ্যক',
-      passwordRequired: 'পাসওয়ার্ড আবশ্যক',
-      passwordMinLength: 'পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে',
-      passwordWeak: 'পাসওয়ার্ডে বড় অক্ষর, ছোট অক্ষর এবং সংখ্যা থাকতে হবে',
-      confirmPasswordRequired: 'পাসওয়ার্ড নিশ্চিত করা আবশ্যক',
-      passwordMismatch: 'পাসওয়ার্ড মিলছে না',
-      registerSuccess: 'অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে! লগইনে পুনঃনির্দেশিত হচ্ছে...',
-      registerError: 'নিবন্ধন ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।',
+      firstNameRequired: "নামের প্রথম অংশ আবশ্যক",
+      lastNameRequired: "নামের শেষ অংশ আবশ্যক",
+      emailRequired: "ইমেইল আবশ্যক",
+      emailInvalid: "অনুগ্রহ করে একটি বৈধ ইমেইল ঠিকানা দিন",
+      phoneRequired: "ফোন নম্বর আবশ্যক",
+      phoneInvalid: "অনুগ্রহ করে একটি বৈধ ফোন নম্বর দিন",
+      dateOfBirthRequired: "জন্ম তারিখ আবশ্যক",
+      genderRequired: "লিঙ্গ আবশ্যক",
+      villageRequired: "গ্রাম/এলাকা আবশ্যক",
+      upazilaRequired: "উপজেলা আবশ্যক",
+      districtRequired: "জেলা আবশ্যক",
+      divisionRequired: "বিভাগ আবশ্যক",
+      passwordRequired: "পাসওয়ার্ড আবশ্যক",
+      passwordMinLength: "পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে",
+      passwordWeak: "পাসওয়ার্ডে বড় অক্ষর, ছোট অক্ষর এবং সংখ্যা থাকতে হবে",
+      confirmPasswordRequired: "পাসওয়ার্ড নিশ্চিত করা আবশ্যক",
+      passwordMismatch: "পাসওয়ার্ড মিলছে না",
+      registerSuccess:
+        "অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে! লগইনে পুনঃনির্দেশিত হচ্ছে...",
+      registerError: "নিবন্ধন ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।",
       // Step Titles
-      step1Title: 'ব্যক্তিগত বিবরণ',
-      step2Title: 'অবস্থান',
-      step3Title: 'চিকিৎসা তথ্য',
-      step4Title: 'নিরাপত্তা',
+      step1Title: "ব্যক্তিগত বিবরণ",
+      step2Title: "অবস্থান",
+      step3Title: "চিকিৎসা তথ্য",
+      step4Title: "নিরাপত্তা",
     },
   };
 
   const t = texts[language];
 
   const divisions = {
-    EN: ['Dhaka', 'Chittagong', 'Rajshahi', 'Khulna', 'Barisal', 'Sylhet', 'Rangpur', 'Mymensingh'],
-    BN: ['ঢাকা', 'চট্টগ্রাম', 'রাজশাহী', 'খুলনা', 'বরিশাল', 'সিলেট', 'রংপুর', 'ময়মনসিংহ'],
+    EN: [
+      "Dhaka",
+      "Chittagong",
+      "Rajshahi",
+      "Khulna",
+      "Barisal",
+      "Sylhet",
+      "Rangpur",
+      "Mymensingh",
+    ],
+    BN: [
+      "ঢাকা",
+      "চট্টগ্রাম",
+      "রাজশাহী",
+      "খুলনা",
+      "বরিশাল",
+      "সিলেট",
+      "রংপুর",
+      "ময়মনসিংহ",
+    ],
   };
 
   const steps = [
@@ -218,7 +244,9 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
     }
     if (!formData.phone) {
       newErrors.phone = t.phoneRequired;
-    } else if (!/^(\+8801|8801|01)[3-9]\d{8}$/.test(formData.phone.replace(/[-\s]/g, ''))) {
+    } else if (
+      !/^(\+8801|8801|01)[3-9]\d{8}$/.test(formData.phone.replace(/[-\s]/g, ""))
+    ) {
       newErrors.phone = t.phoneInvalid;
     }
     if (!formData.dateOfBirth) newErrors.dateOfBirth = t.dateOfBirthRequired;
@@ -270,7 +298,7 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
   // Navigation functions
   const nextStep = () => {
     let isValid = false;
-    
+
     switch (currentStep) {
       case 1:
         isValid = validateStep1();
@@ -300,20 +328,20 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
   // Form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateStep4()) return;
 
-    dispatch({ type: 'LOGIN_START' });
+    dispatch({ type: "LOGIN_START" });
 
     try {
       const response = await AuthService.register(formData);
-      
+
       // Store auth data
       AuthService.storeAuthData(response.data.token, response.data.user);
-      
+
       // Update auth context
       dispatch({
-        type: 'LOGIN_SUCCESS',
+        type: "LOGIN_SUCCESS",
         payload: {
           user: response.data.user,
           token: response.data.token,
@@ -322,21 +350,24 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
 
       // Show success message
       console.log(t.registerSuccess);
-      
+
       // Redirect to dashboard
-      router.push('/dashboard');
+      router.push("/dashboard");
     } catch (error: any) {
-      dispatch({ type: 'LOGIN_FAILURE' });
+      dispatch({ type: "LOGIN_FAILURE" });
       setErrors({ email: error.message || t.registerError });
     }
   };
 
   // Input change handler
-  const handleInputChange = (field: keyof (RegisterRequest & { confirmPassword?: string }), value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (
+    field: keyof (RegisterRequest & { confirmPassword?: string }),
+    value: string
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
@@ -345,17 +376,21 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
     <div className="flex items-center justify-center mb-8">
       {[1, 2, 3, 4].map((step) => (
         <React.Fragment key={step}>
-          <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
-            step <= currentStep 
-              ? 'bg-blue-600 border-blue-600 text-white' 
-              : 'border-gray-300 text-gray-400'
-          }`}>
+          <div
+            className={`flex items-center justify-center w-8 h-8 rounded-full border-2 ${
+              step <= currentStep
+                ? "bg-blue-600 border-blue-600 text-white"
+                : "border-gray-300 text-gray-400"
+            }`}
+          >
             {step}
           </div>
           {step < 4 && (
-            <div className={`w-12 h-0.5 mx-2 ${
-              step < currentStep ? 'bg-blue-600' : 'bg-gray-300'
-            }`} />
+            <div
+              className={`w-12 h-0.5 mx-2 ${
+                step < currentStep ? "bg-blue-600" : "bg-gray-300"
+              }`}
+            />
           )}
         </React.Fragment>
       ))}
@@ -374,10 +409,12 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
             <input
               type="text"
               value={formData.firstName}
-              onChange={(e) => handleInputChange('firstName', e.target.value)}
+              onChange={(e) => handleInputChange("firstName", e.target.value)}
               placeholder={t.firstNamePlaceholder}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                errors.firstName ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                errors.firstName
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-300"
               }`}
             />
             {errors.firstName && (
@@ -392,10 +429,10 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
             <input
               type="text"
               value={formData.lastName}
-              onChange={(e) => handleInputChange('lastName', e.target.value)}
+              onChange={(e) => handleInputChange("lastName", e.target.value)}
               placeholder={t.lastNamePlaceholder}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                errors.lastName ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                errors.lastName ? "border-red-300 bg-red-50" : "border-gray-300"
               }`}
             />
             {errors.lastName && (
@@ -411,10 +448,10 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
           <input
             type="email"
             value={formData.email}
-            onChange={(e) => handleInputChange('email', e.target.value)}
+            onChange={(e) => handleInputChange("email", e.target.value)}
             placeholder={t.emailPlaceholder}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-              errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
+              errors.email ? "border-red-300 bg-red-50" : "border-gray-300"
             }`}
           />
           {errors.email && (
@@ -429,10 +466,10 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
           <input
             type="tel"
             value={formData.phone}
-            onChange={(e) => handleInputChange('phone', e.target.value)}
+            onChange={(e) => handleInputChange("phone", e.target.value)}
             placeholder={t.phonePlaceholder}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-              errors.phone ? 'border-red-300 bg-red-50' : 'border-gray-300'
+              errors.phone ? "border-red-300 bg-red-50" : "border-gray-300"
             }`}
           />
           {errors.phone && (
@@ -447,9 +484,11 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
           <input
             type="date"
             value={formData.dateOfBirth}
-            onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-              errors.dateOfBirth ? 'border-red-300 bg-red-50' : 'border-gray-300'
+            onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+            className={`text-black w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+              errors.dateOfBirth
+                ? "border-red-300 bg-red-50"
+                : "border-gray-300"
             }`}
           />
           {errors.dateOfBirth && (
@@ -458,14 +497,14 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-[black] mb-2">
             {t.gender}
           </label>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="text-black grid grid-cols-3 gap-3">
             {[
-              { value: 'MALE', label: t.genderMale },
-              { value: 'FEMALE', label: t.genderFemale },
-              { value: 'OTHER', label: t.genderOther },
+              { value: "MALE", label: t.genderMale },
+              { value: "FEMALE", label: t.genderFemale },
+              { value: "OTHER", label: t.genderOther },
             ].map((option) => (
               <label key={option.value} className="flex items-center">
                 <input
@@ -473,7 +512,12 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
                   name="gender"
                   value={option.value}
                   checked={formData.gender === option.value}
-                  onChange={(e) => handleInputChange('gender', e.target.value as 'MALE' | 'FEMALE' | 'OTHER')}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "gender",
+                      e.target.value as "MALE" | "FEMALE" | "OTHER"
+                    )
+                  }
                   className="mr-2 text-blue-600"
                 />
                 <span className="text-sm">{option.label}</span>
@@ -499,10 +543,10 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
           <input
             type="text"
             value={formData.village}
-            onChange={(e) => handleInputChange('village', e.target.value)}
+            onChange={(e) => handleInputChange("village", e.target.value)}
             placeholder={t.villagePlaceholder}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-              errors.village ? 'border-red-300 bg-red-50' : 'border-gray-300'
+              errors.village ? "border-red-300 bg-red-50" : "border-gray-300"
             }`}
           />
           {errors.village && (
@@ -517,10 +561,10 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
           <input
             type="text"
             value={formData.upazila}
-            onChange={(e) => handleInputChange('upazila', e.target.value)}
+            onChange={(e) => handleInputChange("upazila", e.target.value)}
             placeholder={t.upazilaPlaceholder}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-              errors.upazila ? 'border-red-300 bg-red-50' : 'border-gray-300'
+              errors.upazila ? "border-red-300 bg-red-50" : "border-gray-300"
             }`}
           />
           {errors.upazila && (
@@ -535,10 +579,10 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
           <input
             type="text"
             value={formData.district}
-            onChange={(e) => handleInputChange('district', e.target.value)}
+            onChange={(e) => handleInputChange("district", e.target.value)}
             placeholder={t.districtPlaceholder}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-              errors.district ? 'border-red-300 bg-red-50' : 'border-gray-300'
+              errors.district ? "border-red-300 bg-red-50" : "border-gray-300"
             }`}
           />
           {errors.district && (
@@ -552,9 +596,9 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
           </label>
           <select
             value={formData.division}
-            onChange={(e) => handleInputChange('division', e.target.value)}
+            onChange={(e) => handleInputChange("division", e.target.value)}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-              errors.division ? 'border-red-300 bg-red-50' : 'border-gray-300'
+              errors.division ? "border-red-300 bg-red-50" : "border-gray-300"
             }`}
           >
             <option value="">{t.divisionPlaceholder}</option>
@@ -582,7 +626,9 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
           </label>
           <textarea
             value={formData.medicalHistory}
-            onChange={(e) => handleInputChange('medicalHistory', e.target.value)}
+            onChange={(e) =>
+              handleInputChange("medicalHistory", e.target.value)
+            }
             placeholder={t.medicalHistoryPlaceholder}
             rows={3}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
@@ -595,7 +641,7 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
           </label>
           <textarea
             value={formData.allergies}
-            onChange={(e) => handleInputChange('allergies', e.target.value)}
+            onChange={(e) => handleInputChange("allergies", e.target.value)}
             placeholder={t.allergiesPlaceholder}
             rows={3}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
@@ -608,7 +654,9 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
           </label>
           <textarea
             value={formData.currentMedications}
-            onChange={(e) => handleInputChange('currentMedications', e.target.value)}
+            onChange={(e) =>
+              handleInputChange("currentMedications", e.target.value)
+            }
             placeholder={t.currentMedicationsPlaceholder}
             rows={3}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
@@ -628,12 +676,12 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
           </label>
           <div className="relative">
             <input
-              type={showPassword ? 'text' : 'password'}
+              type={showPassword ? "text" : "password"}
               value={formData.password}
-              onChange={(e) => handleInputChange('password', e.target.value)}
+              onChange={(e) => handleInputChange("password", e.target.value)}
               placeholder={t.passwordPlaceholder}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors pr-12 ${
-                errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                errors.password ? "border-red-300 bg-red-50" : "border-gray-300"
               }`}
             />
             <button
@@ -642,13 +690,38 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
             >
               {showPassword ? (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464m1.414 1.414L8.464 8.464m4.242 4.242L21 21" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464m1.414 1.414L8.464 8.464m4.242 4.242L21 21"
+                  />
                 </svg>
               ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
                 </svg>
               )}
             </button>
@@ -663,16 +736,25 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
             {t.confirmPassword}
           </label>
           <input
-            type={showPassword ? 'text' : 'password'}
-            value={(formData as any).confirmPassword || ''}
-            onChange={(e) => handleInputChange('confirmPassword' as keyof RegisterRequest, e.target.value)}
+            type={showPassword ? "text" : "password"}
+            value={(formData as any).confirmPassword || ""}
+            onChange={(e) =>
+              handleInputChange(
+                "confirmPassword" as keyof RegisterRequest,
+                e.target.value
+              )
+            }
             placeholder={t.confirmPasswordPlaceholder}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-              errors.confirmPassword ? 'border-red-300 bg-red-50' : 'border-gray-300'
+              errors.confirmPassword
+                ? "border-red-300 bg-red-50"
+                : "border-gray-300"
             }`}
           />
           {errors.confirmPassword && (
-            <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+            <p className="mt-1 text-sm text-red-600">
+              {errors.confirmPassword}
+            </p>
           )}
         </div>
       </div>
@@ -684,8 +766,18 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
       {/* Header */}
       <div className="text-center mb-8">
         <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-          <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+          <svg
+            className="w-8 h-8 text-blue-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+            />
           </svg>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">{t.title}</h1>
@@ -710,8 +802,8 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
           disabled={currentStep === 1}
           className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
             currentStep === 1
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
           }`}
         >
           {t.back}
@@ -737,7 +829,7 @@ export default function RegisterForm({ onToggleMode, language }: RegisterFormPro
       {/* Toggle to Login */}
       <div className="mt-8 text-center">
         <p className="text-gray-600">
-          {t.alreadyHaveAccount}{' '}
+          {t.alreadyHaveAccount}{" "}
           <button
             onClick={onToggleMode}
             className="text-blue-600 hover:text-blue-800 font-medium transition-colors"

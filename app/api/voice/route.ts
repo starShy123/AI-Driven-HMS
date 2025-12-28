@@ -104,7 +104,7 @@ export const POST = async (request: NextRequest) => {
     const apiError = handleApiError(error)
     return NextResponse.json(apiError, { status: 500 })
   }
-})
+};
 
 // GET /api/voice - Get user's voice interactions
 export const GET = async (request: NextRequest) => {
@@ -181,4 +181,4 @@ export const GET = async (request: NextRequest) => {
     const apiError = handleApiError(error)
     return NextResponse.json(apiError, { status: 500 })
   }
-})
+};

@@ -51,7 +51,7 @@ export const GET = async (request: NextRequest, { params }: RouteParams) => {
     const apiError = handleApiError(error)
     return NextResponse.json(apiError, { status: 500 })
   }
-})
+};
 
 // PATCH /api/resources/[id] - Update medical resource (Admin/Healthcare Worker only)
 export const PATCH = async (request: NextRequest, { params }: RouteParams) => {
@@ -113,7 +113,7 @@ export const PATCH = async (request: NextRequest, { params }: RouteParams) => {
     const apiError = handleApiError(error)
     return NextResponse.json(apiError, { status: 500 })
   }
-})
+};
 
 // DELETE /api/resources/[id] - Deactivate medical resource (Admin only)
 export const DELETE = async (request: NextRequest, { params }: RouteParams) => {
@@ -154,4 +154,4 @@ export const DELETE = async (request: NextRequest, { params }: RouteParams) => {
     const apiError = handleApiError(error)
     return NextResponse.json(apiError, { status: 500 })
   }
-})
+};

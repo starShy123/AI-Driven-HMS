@@ -48,4 +48,4 @@ export const POST = async (request: NextRequest) => {
     const apiError = handleApiError(error)
     return NextResponse.json(apiError, { status: 500 })
   }
-})
+};

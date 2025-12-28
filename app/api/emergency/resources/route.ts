@@ -124,7 +124,7 @@ export const GET = async (request: NextRequest) => {
     const apiError = handleApiError(error)
     return NextResponse.json(apiError, { status: 500 })
   }
-})
+};
 
 // POST /api/emergency/resources/nearby - Alternative endpoint with body params
 export const POST = async (request: NextRequest) => {
@@ -217,4 +217,4 @@ export const POST = async (request: NextRequest) => {
     const apiError = handleApiError(error)
     return NextResponse.json(apiError, { status: 500 })
   }
-})
+};

@@ -32,6 +32,7 @@ export const POST = async (request: NextRequest) => {
       data: {
         ...validatedData,
         password: hashedPassword,
+        dateOfBirth: validatedData.dateOfBirth ? new Date(validatedData.dateOfBirth) : undefined,
       },
       select: {
         id: true,
