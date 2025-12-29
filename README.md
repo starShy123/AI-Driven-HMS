@@ -1,4 +1,4 @@
-# ShasthoBondhu AI - Healthcare Access Platform
+# AI Driven Healthcare Platform
 
 ## Team Information
 
